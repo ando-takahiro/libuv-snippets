@@ -47,3 +47,7 @@ node_modules
 # Cloud9 ide #
 ##############
 .c9revisions
+
+# Vim files #
+#############
+*~

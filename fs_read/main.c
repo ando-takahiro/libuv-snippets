@@ -6,6 +6,7 @@ uv_loop_t* loop;
 
 uv_fs_t open_req;
 uv_fs_t read_req;
+uv_fs_t cancel_req;
 uv_fs_t close_req;
 
 char buffer[32];
@@ -29,6 +30,7 @@ int main(int argc, char **argv) {
 }
 
 void on_open(uv_fs_t* req) {
+    fprintf(stderr, "open:%zd\n", req->result);
     if (req->result >= 0) {
         // read file
         memset(buffer, 0, sizeof (buffer));
@@ -45,6 +47,7 @@ void on_open(uv_fs_t* req) {
 }
 
 void on_read(uv_fs_t* req) {
+    fprintf(stderr, "read:%zd\n", req->result);
     if (req->result >= 0) {
         offset += req->result;
         fwrite(buffer, 1, req->result, stdout);
@@ -57,14 +60,17 @@ void on_read(uv_fs_t* req) {
     uv_fs_req_cleanup(req);
 
     if (req->result >= sizeof (buffer)) {
-        // try again
+        // try again, but ...
         uv_fs_read(loop, &read_req, open_req.result, &iov, 1, offset, on_read);
+        // CANCEL!!!
+        uv_cancel((uv_req_t*)&read_req);
     } else {
         uv_fs_close(loop, &close_req, open_req.result, on_close);
     }
 }
 
 void on_close(uv_fs_t* req) {
+    fprintf(stderr, "close:%zd\n", req->result);
     if (req->result < 0) {
         // handle error
         fprintf(stderr, "close failed:%s\n", uv_strerror(req->result));
