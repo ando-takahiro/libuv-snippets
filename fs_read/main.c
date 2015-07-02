@@ -5,7 +5,6 @@
 uv_loop_t* loop;
 
 uv_fs_t open_req;
-uv_fs_t stat_req;
 uv_fs_t read_req;
 uv_fs_t close_req;
 
@@ -73,7 +72,7 @@ void on_close(uv_fs_t* req) {
     }
 
     // It seems that we don't need to call uv_close, because there are no handles.
-    // I could not file uv_close in official test case here(https://github.com/libuv/libuv/blob/v1.x/test/test-fs.c)
+    // I could not find uv_close in official test case here(https://github.com/libuv/libuv/blob/v1.x/test/test-fs.c)
     uv_fs_req_cleanup(req);
 }
 
