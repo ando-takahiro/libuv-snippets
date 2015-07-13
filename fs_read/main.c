@@ -9,7 +9,7 @@ uv_fs_t read_req;
 uv_fs_t close_req;
 
 char buffer[32];
-uv_buf_t iov;
+uv_buf_t uv_buffer;
 int64_t offset = 0;
 
 void on_open(uv_fs_t* req);
@@ -32,9 +32,9 @@ void on_open(uv_fs_t* req) {
     if (req->result >= 0) {
         // read file
         memset(buffer, 0, sizeof (buffer));
-        iov = uv_buf_init(buffer, sizeof (buffer));
+        uv_buffer = uv_buf_init(buffer, sizeof (buffer));
         offset = 0;
-        uv_fs_read(loop, &read_req, open_req.result, &iov, 1, offset, on_read);
+        uv_fs_read(loop, &read_req, open_req.result, &uv_buffer, 1, offset, on_read);
     } else {
         // handle error
         fprintf(stderr, "open failed:%s\n", uv_strerror(req->result));
@@ -58,7 +58,7 @@ void on_read(uv_fs_t* req) {
 
     if (req->result >= sizeof (buffer)) {
         // try again
-        uv_fs_read(loop, &read_req, open_req.result, &iov, 1, offset, on_read);
+        uv_fs_read(loop, &read_req, open_req.result, &uv_buffer, 1, offset, on_read);
     } else {
         uv_fs_close(loop, &close_req, open_req.result, on_close);
     }
